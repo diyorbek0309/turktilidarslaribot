@@ -1,8 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { TOKEN } = require("./config");
 const ExtraControllers = require("./controllers/ExtraControllers");
-const GameController = require("./controllers/GameController");
-const GamerController = require("./controllers/GamerController");
 const postgres = require("./modules/postgres");
 
 const bot = new TelegramBot(TOKEN, { polling: true });
@@ -11,42 +9,41 @@ async function main() {
   const psql = await postgres();
 
   await bot.onText(/^\/start$/, (message) => {
+    console.log(bot, message);
     bot.sendMessage(
       message.chat.id,
-      `Botdan foydalanish uchun guruhga administrator sifatida qoʻshishingiz kerak!`
+      `Assalomu aleykum. Anonim savol-javoblar botiga xush kelibsiz!
+Sizning manzil: t.me/AnonimSavolJavobBot?start=${message.chat.id}
+      \nUshbu havolani do'stlaringiz, obunachilaringiz bilan ulashing va ulardan anonim savollar va javoblar oling!
+      `
     );
   });
 
-  await bot.onText(/\/startSvoyak/, (message) => {
-    GameController(message.chat, message.from, "start", bot, psql);
-  });
-
-  await bot.onText(/\/endSvoyak/, (message) => {
-    GameController(message.chat, message.from, "end", bot, psql);
-  });
-
-  await bot.onText(/^[-+]?\d+?$/, (message) => {
-    if (message.reply_to_message) {
-      GamerController(message, bot, psql);
-    }
-  });
-
-  await bot.onText(/\/removeMe/, (message) => {
-    ExtraControllers.RemoveGamer(message, bot, psql);
-  });
-
-  await bot.onText(/\/changeCreator/, (message) => {
-    if (message.reply_to_message) {
-      ExtraControllers.ChangeCreator(message, bot, psql);
-    }
-  });
-
-  await bot.onText(/\/getStats/, (message) => {
-    ExtraControllers.StatsController(message, bot, psql);
-  });
-
-  await bot.onText(/\/clearDB/, (message) => {
-    ExtraControllers.ClearDB(message, bot, psql);
+  await bot.onText(/\/start (.+)/, (message, match) => {
+    const startId = match[1];
+    bot.sendMessage(message.chat.id, `Savolingizni yozing:`);
+    bot.once("message", async (msg) => {
+      await bot.sendMessage(
+        175604385,
+        `${
+          message.chat.username
+            ? "@" + message.chat.username
+            : message.chat.first_name
+        } foydalanuvchi (${
+          msg.chat.username ? "@" + msg.chat.username : msg.chat.first_name
+        }) savol yubordi:\n${msg.text}`
+      );
+      await bot
+        .sendMessage(
+          startId,
+          `Sizga foydalanuvchi (${
+            msg.chat.username ? "@" + msg.chat.username : msg.chat.first_name
+          }) savol yubordi:\n${msg.text}`
+        )
+        .then(() => {
+          bot.sendMessage(message.chat.id, `Savolingiz jo'natildi. Raxmat!`);
+        });
+    });
   });
 
   await bot.onText(/\/help/, (message) => {
@@ -62,10 +59,6 @@ async function main() {
       `Shaxsiy oʻyin jarayonida ochkolarni hisoblab boruvchi bot.\nDasturchi: @dasturchining_tundaligi`
     );
   });
-
-  // await bot.onText(/\/aytibar/, (message) => {
-  //   ExtraControllers.Aytibar(message, bot);
-  // });
 }
 
 main();
