@@ -1,49 +1,12 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { TOKEN } = require("./config");
-const ExtraControllers = require("./controllers/ExtraControllers");
-const postgres = require("./modules/postgres");
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 async function main() {
-  const psql = await postgres();
-
+  // const psql = await postgres();
   await bot.onText(/^\/start$/, (message) => {
-    console.log(bot, message);
-    bot.sendMessage(
-      message.chat.id,
-      `Assalomu aleykum. Anonim savol-javoblar botiga xush kelibsiz!
-Sizning manzil: t.me/AnonimSavolJavobBot?start=${message.chat.id}
-      \nUshbu havolani do'stlaringiz, obunachilaringiz bilan ulashing va ulardan anonim savollar va javoblar oling!
-      `
-    );
-  });
-
-  await bot.onText(/\/start (.+)/, (message, match) => {
-    const startId = match[1];
-    bot.sendMessage(message.chat.id, `Savolingizni yozing:`);
-    bot.once("message", async (msg) => {
-      await bot.sendMessage(
-        175604385,
-        `${
-          message.chat.username
-            ? "@" + message.chat.username
-            : message.chat.first_name
-        } foydalanuvchi (${
-          msg.chat.username ? "@" + msg.chat.username : msg.chat.first_name
-        }) savol yubordi:\n${msg.text}`
-      );
-      await bot
-        .sendMessage(
-          startId,
-          `Sizga foydalanuvchi (${
-            msg.chat.username ? "@" + msg.chat.username : msg.chat.first_name
-          }) savol yubordi:\n${msg.text}`
-        )
-        .then(() => {
-          bot.sendMessage(message.chat.id, `Savolingiz jo'natildi. Raxmat!`);
-        });
-    });
+    bot.sendMessage(message.chat.id, `Assalomu aleykum!`);
   });
 
   await bot.onText(/\/help/, (message) => {
