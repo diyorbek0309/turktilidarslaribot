@@ -8,14 +8,15 @@ const sequelize = new Sequelize(POSTGRES, {
 
 async function postgres() {
   try {
-    let db = {};
+    const db = {};
 
-    db.users = await Models.UserModel(Sequelize, sequelize);
-    db.groups = await Models.GroupModel(Sequelize, sequelize);
-    db.games = await Models.GameModel(Sequelize, sequelize);
-    db.gamers = await Models.GamerModel(Sequelize, sequelize);
+    db.sequelize = sequelize;
+    db.Sequelize = Sequelize;
 
-    await sequelize.sync({ force: false });
+    db.users = Models.UserModel(Sequelize, sequelize);
+    db.settings = Models.SettingModel(Sequelize, sequelize);
+
+    await sequelize.sync({ force: true });
 
     return db;
   } catch (error) {
