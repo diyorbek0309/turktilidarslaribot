@@ -16,7 +16,7 @@ async function postgres() {
     db.users = Models.UserModel(Sequelize, sequelize);
     db.settings = Models.SettingModel(Sequelize, sequelize);
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: false });
 
     return db;
   } catch (error) {
