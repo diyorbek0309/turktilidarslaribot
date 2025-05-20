@@ -267,5 +267,11 @@ bot.onText(/^\/all_stats$/, async (msg) => {
   await bot.sendMessage(msg.chat.id, text, { parse_mode: "Markdown" });
 });
 
+await bot.onText(/\/about/, (message) => {
+  bot.sendMessage(
+      message.chat.id,
+      `Turk tili videodarslari kanaliga qo'shilish uchun bot.\nDasturchi: @dasturchining_tundaligi`
+  );
+});
 
 main();
