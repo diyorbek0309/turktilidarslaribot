@@ -1,12 +1,22 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { TOKEN } = require("./config");
+const Utils = require("./utils");
 const { Sequelize } = require("sequelize");
 const postgres = require("./modules/postgres");
 
 const bot = new TelegramBot(TOKEN, { polling: true });
-const adminId = 175604385;
+const adminIds = [175604385, 6819336169];
 const botUsername = "turktilidarslari_bot";
 const requiredChannels = ["dasturchining_tundaligi", "zakadabiyot"]
+const defaultKeyboard = {
+  reply_markup: {
+    keyboard: [
+      [{ text: "📊 Mening ballarim" }]
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: false
+  }
+};
 
 async function isUserSubscribedToAllChannels(userId) {
   for (const channel of requiredChannels) {
@@ -52,11 +62,10 @@ async function main() {
   });
   const privateChannelLink = privateChannelSetting
       ? privateChannelSetting.value
-      : "https://t.me/your_private_channel";
+      : "https://t.me/+aqTgVtE0vThiMjUy";
   const requiredReferrals = requiredReferralsSetting
       ? parseInt(requiredReferralsSetting.value)
       : 10;
-
 
   bot.onText(/^\/start(?:\s(\d+))?$/, async (msg, match) => {
     const chatId = msg.chat.id;
@@ -162,15 +171,33 @@ Yopiq kanalga faqat taklif asosida kirish mumkin. Bot orqali siz ham darslarga q
 🎯 Darslarga kirish uchun botga start bosing:
 ${referalLink}`;
 
-      await bot.sendMessage(chatId, text);
+      await bot.sendMessage(chatId, text, {
+        ...defaultKeyboard
+      });
       await bot.answerCallbackQuery(query.id);
     }
   });
 }
 
+bot.on("message", async (msg) => {
+  const chatId = msg.chat.id;
+  const db = await postgres();
+
+  if (msg.text === "📊 Mening ballarim") {
+    const user = await db.users.findByPk(chatId);
+
+    if (!user) {
+      return bot.sendMessage(chatId, "Siz ro‘yxatdan o‘tmagansiz.");
+    }
+
+    return bot.sendMessage(chatId, `📊 Siz ${user.referral_count} ta do‘stingizni taklif qilgansiz.`);
+  }
+});
+
+
 bot.onText(/^\/set_public_channel (.+)$/, async (msg, match) => {
   const db = await postgres();
-  if (msg.from.id !== adminId) return;
+  if (!adminIds.includes(msg.from.id)) return;
 
   const url = match[1];
   await db.settings.upsert({ key: "public_channel_url", value: url });
@@ -179,7 +206,7 @@ bot.onText(/^\/set_public_channel (.+)$/, async (msg, match) => {
 
 bot.onText(/^\/set_private_channel (.+)$/, async (msg, match) => {
   const db = await postgres();
-  if (msg.from.id !== adminId) return;
+  if (!adminIds.includes(msg.from.id)) return;
 
   const url = match[1];
   await db.settings.upsert({ key: "private_channel_url", value: url });
@@ -188,7 +215,7 @@ bot.onText(/^\/set_private_channel (.+)$/, async (msg, match) => {
 
 bot.onText(/^\/set_referrals (\d+)$/, async (msg, match) => {
   const db = await postgres();
-  if (msg.from.id !== adminId) return;
+  if (!adminIds.includes(msg.from.id)) return;
 
   const count = parseInt(match[1]);
   await db.settings.upsert({ key: "required_referrals", value: count.toString() });
@@ -212,7 +239,7 @@ bot.onText(/^\/my_stats$/, async (msg) => {
 
 bot.onText(/^\/all_stats$/, async (msg) => {
   const db = await postgres();
-  if (msg.from.id !== adminId) return;
+  if (!adminIds.includes(msg.from.id)) return;
 
   const totalSent = await db.users.count({
     where: { is_channel_sent: true },
@@ -227,12 +254,7 @@ bot.onText(/^\/all_stats$/, async (msg) => {
   });
 
   let table = users
-      .map((user, index) => {
-        const name = user.username
-            ? `@${user.username}`
-            : `[${user.chat_id}](tg://user?id=${user.chat_id})`;
-        return `${index + 1}. ${name} — ${user.referral_count} ta`;
-      })
+      .map((user, index) => `${index + 1}. ${Utils.escapeMarkdown(user.username)} — ${user.referral_count} ta`)
       .join("\n");
 
   const text =
