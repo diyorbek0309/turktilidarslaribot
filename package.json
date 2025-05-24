@@ -2,10 +2,10 @@
   "name": "svoyakcalculatorbot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "start": "set NODE_ENV=production&& node index.js",
-    "dev": "nodemon index.js",
+    "start": "set NODE_ENV=production&& node main.js",
+    "dev": "nodemon main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
