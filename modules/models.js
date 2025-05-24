@@ -1,62 +1,36 @@
 module.exports = class Models {
-  static async UserModel(Sequelize, sequelize) {
-    return await sequelize.define("user", {
+  static UserModel(Sequelize, sequelize) {
+    return sequelize.define("user", {
       chat_id: {
         type: Sequelize.DataTypes.BIGINT,
         primaryKey: true,
       },
-    });
-  }
-  static async GroupModel(Sequelize, sequelize) {
-    return await sequelize.define("group", {
-      id: {
-        type: Sequelize.DataTypes.BIGINT,
-        primaryKey: true,
-      },
-      title: {
+      username: {
         type: Sequelize.DataTypes.STRING,
       },
-    });
-  }
-  static async GameModel(Sequelize, sequelize) {
-    return await sequelize.define("game", {
-      id: {
-        type: Sequelize.DataTypes.UUID,
-        defaultValue: Sequelize.DataTypes.UUIDV4,
-        primaryKey: true,
-      },
-      group_id: {
+      referred_by: {
         type: Sequelize.DataTypes.BIGINT,
+        allowNull: true,
       },
-      creator_id: {
-        type: Sequelize.DataTypes.BIGINT,
-      },
-      creator_user_name: {
-        type: Sequelize.DataTypes.STRING,
-      },
-      status: {
-        type: Sequelize.DataTypes.STRING,
-      },
-    });
-  }
-  static async GamerModel(Sequelize, sequelize) {
-    return await sequelize.define("gamer", {
-      id: {
-        type: Sequelize.DataTypes.UUID,
-        defaultValue: Sequelize.DataTypes.UUIDV4,
-        primaryKey: true,
-      },
-      game_id: {
-        type: Sequelize.DataTypes.UUID,
-      },
-      user_id: {
-        type: Sequelize.DataTypes.BIGINT,
-      },
-      user_name: {
-        type: Sequelize.DataTypes.STRING,
-      },
-      score: {
+      referral_count: {
         type: Sequelize.DataTypes.INTEGER,
+        defaultValue: 0,
+      },
+      is_channel_sent: {
+        type: Sequelize.DataTypes.BOOLEAN,
+        defaultValue: false,
+      }
+    });
+  }
+
+  static SettingModel(Sequelize, sequelize) {
+    return sequelize.define("setting", {
+      key: {
+        type: Sequelize.DataTypes.STRING,
+        primaryKey: true,
+      },
+      value: {
+        type: Sequelize.DataTypes.STRING,
       },
     });
   }
