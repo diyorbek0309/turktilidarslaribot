@@ -7,7 +7,7 @@ const postgres = require("./modules/postgres");
 const bot = new TelegramBot(TOKEN, { polling: true });
 const adminIds = [175604385, 6819336169];
 const botUsername = "turktilidarslari_bot";
-const requiredChannels = ["dasturchining_tundaligi", "zakadabiyot"]
+const requiredChannels = ["davlatmurodova_turktili"]
 const defaultKeyboard = {
   reply_markup: {
     keyboard: [
